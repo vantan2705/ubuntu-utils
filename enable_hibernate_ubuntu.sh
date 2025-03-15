@@ -88,10 +88,10 @@ cat <<EOF
    cd /đường/dẫn/đến/script
 
 2️⃣ Cấp quyền chạy cho script:
-   chmod +x enable-hibernate.sh
+   chmod +x enable_hibernate_ubuntu.sh
 
 3️⃣ Chạy script với quyền root:
-   sudo ./enable-hibernate.sh
+   sudo ./enable_hibernate_ubuntu.sh
 
 📌 Nếu có vấn đề, hãy kiểm tra swap và kernel logs!
 =================================================
