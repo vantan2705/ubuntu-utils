@@ -16,6 +16,7 @@ echo "✅ Git version:"
 git --version
 
 echo "🧾 Cấu hình tên và email Git..."
+git config --global credential.helper store
 git config --global user.name "$GIT_NAME"
 git config --global user.email "$GIT_EMAIL"
 
