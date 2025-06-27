@@ -32,6 +32,11 @@ echo "🔁 Kích hoạt và khởi động Docker..."
 sudo systemctl enable docker
 sudo systemctl start docker
 
+echo "Create the docker group
+sudo groupadd docker
+
+newgrp docker
+
 echo "👤 Thêm người dùng hiện tại vào group docker..."
 sudo usermod -aG docker "$USER"
 
