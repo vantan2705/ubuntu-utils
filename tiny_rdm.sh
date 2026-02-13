@@ -42,7 +42,15 @@ fi
 
 rm -rf squashfs-root
 
-# 5. Create desktop shortcut
+# 5) Detect WM_CLASS
+echo "🔎 Detecting WM_CLASS (click on x-getter window)..."
+"$APPIMAGE_PATH" &
+sleep 3
+
+WM_CLASS=$(xprop WM_CLASS | awk -F\" '{print $4}' | head -n1 || true)
+echo "➡ Detected WM_CLASS: $WM_CLASS"
+
+# 6. Create desktop shortcut
 echo "🧩 Creating desktop shortcut..."
 mkdir -p "$(dirname "$DESKTOP_FILE")"
 
