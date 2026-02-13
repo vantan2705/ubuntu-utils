@@ -63,7 +63,7 @@ Icon=$ICON_PATH
 Terminal=false
 Type=Application
 Categories=Development;Database;
-StartupWMClass=Tiny-rdm
+StartupWMClass=$WM_CLASS
 EOF
 
 chmod +x "$DESKTOP_FILE"
