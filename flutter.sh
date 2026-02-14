@@ -1,33 +1,65 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -e
 
-FLUTTER_VERSION="3.13.9"
+FLUTTER_VERSION="3.32.8"
+FLUTTER_CHANNEL="stable"
 INSTALL_DIR="$HOME/flutter"
-PROFILE_FILE="$HOME/.bashrc"  # Đổi thành ~/.zshrc nếu bạn dùng zsh
+TMP_DIR="/tmp/flutter-install"
+FLUTTER_TARBALL="flutter_linux_${FLUTTER_VERSION}-${FLUTTER_CHANNEL}.tar.xz"
+DOWNLOAD_URL="https://storage.googleapis.com/flutter_infra_release/releases/${FLUTTER_CHANNEL}/linux/${FLUTTER_TARBALL}"
 
-echo "📦 Cài đặt các gói phụ thuộc..."
-sudo apt update
-sudo apt install -y curl git unzip xz-utils libglu1-mesa
+echo "🚀 Installing Flutter $FLUTTER_VERSION ($FLUTTER_CHANNEL)..."
 
-echo "🌐 Tải Flutter $FLUTTER_VERSION..."
-cd /tmp
-curl -LO "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
+# 1) Clean old temp
+rm -rf "$TMP_DIR"
+mkdir -p "$TMP_DIR"
+cd "$TMP_DIR"
 
-echo "📂 Giải nén Flutter vào $INSTALL_DIR..."
-rm -rf "$INSTALL_DIR"
-mkdir -p "$INSTALL_DIR"
-tar -xf "flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" -C "$HOME"
+# 2) Download Flutter
+echo "⬇️  Downloading Flutter SDK..."
+wget -O "$FLUTTER_TARBALL" "$DOWNLOAD_URL"
 
-echo "🔧 Thêm Flutter vào PATH trong $PROFILE_FILE..."
-if ! grep -q 'export PATH="$HOME/flutter/bin:$PATH"' "$PROFILE_FILE"; then
-  echo 'export PATH="$HOME/flutter/bin:$PATH"' >> "$PROFILE_FILE"
-  echo "✅ Đã thêm Flutter vào PATH."
-else
-  echo "⚠️ PATH đã tồn tại trong $PROFILE_FILE."
+# 3) Remove old Flutter (if exists)
+if [ -d "$INSTALL_DIR" ]; then
+  echo "⚠️  Existing Flutter found at $INSTALL_DIR"
+  read -p "Do you want to remove it? (y/N): " confirm
+  if [[ "$confirm" =~ ^[Yy]$ ]]; then
+    rm -rf "$INSTALL_DIR"
+  else
+    echo "❌ Installation cancelled"
+    exit 1
+  fi
 fi
 
-echo "🔄 Tải thông tin các công cụ Flutter..."
-export PATH="$HOME/flutter/bin:$PATH"
-flutter doctor
+# 4) Extract
+echo "📦 Extracting Flutter..."
+tar -xf "$FLUTTER_TARBALL"
+mv flutter "$INSTALL_DIR"
 
-echo "✅ Cài đặt Flutter $FLUTTER_VERSION hoàn tất. Hãy mở terminal mới hoặc chạy: source $PROFILE_FILE"
+# 5) Add PATH
+echo "🔧 Configuring PATH..."
+
+add_path() {
+  local file="$1"
+  if [ -f "$file" ] && ! grep -q 'flutter/bin' "$file"; then
+    echo '' >> "$file"
+    echo '# Flutter SDK' >> "$file"
+    echo 'export PATH="$HOME/flutter/bin:$PATH"' >> "$file"
+    echo "✔ Added Flutter PATH to $file"
+  fi
+}
+
+add_path "$HOME/.bashrc"
+
+source ~/.bashrc
+
+# 6) Cleanup
+rm -rf "$TMP_DIR"
+
+# 7) Verify
+echo "✅ Flutter installed successfully!"
+echo "➡ Reload your shell or run:"
+echo "   source ~/.bashrc"
+echo "🔎 Flutter version:"
+flutter --version
